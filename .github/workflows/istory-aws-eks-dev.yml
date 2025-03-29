@@ -104,11 +104,13 @@ jobs:
           ref: main # 바꾸기
           path: .
           token: ${{ secrets.GIT_PAT }}
+
       - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -138,7 +140,7 @@ jobs:
       - name: kustomize update image yaml
         run: |
           cd overlay/aws-dev
-          kustomize edit set image istory=Changsyn/istory:${{ github.run_number }}
+          kustomize edit set image ${{ secrets.DOCKER_USERNAME }}/istory=${{ secrets.DOCKER_USERNAME }}/istory:${{ github.run_number }}
 
       - name: push yaml
         run: |
