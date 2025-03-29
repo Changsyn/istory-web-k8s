@@ -118,6 +118,7 @@ jobs:
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name istory
+          
       - name: apply secret
         run: |
           kubectl create secret generic istory-db-secret \
@@ -127,14 +128,17 @@ jobs:
             --from-literal=MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
             --namespace=default \
             --dry-run=client -o yaml | kubectl apply -f -
+
       - name: kustomize install
         run: |
           curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
           sudo mv kustomize /usr/local/bin
+
       - name: kustomize update image yaml
         run: |
-          cd overlay/awd-dev
+          cd overlay/aws-dev
           kustomize edit set image istory=Changsyn/istory:${{ github.run_number }}
+
       - name: push yaml
         run: |
           git config --global user.name 'github-actions[bot]'
