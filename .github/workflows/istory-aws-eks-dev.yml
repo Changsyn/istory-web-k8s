@@ -141,7 +141,7 @@ jobs:
       - name: kustomize update image yaml
         run: |
           cd overlay/aws-dev
-          kustomize edit set image istory=dagntong76/istory:${{ github.run_number }}
+          kustomize edit set image istory=Changsyn/istory:${{ github.run_number }}
 
       - name: push yaml
         run: |
