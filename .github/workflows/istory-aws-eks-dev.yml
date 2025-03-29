@@ -101,7 +101,8 @@ jobs:
 
       - name: Install kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
+          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
       
@@ -110,7 +111,7 @@ jobs:
           curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-          
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -120,4 +121,4 @@ jobs:
   
       - name: Update kubeconfig for EKS
         run: |
-          aws eks update-kubeconfig --region $AWS_REGION --name your-cluster-name
+          aws eks update-kubeconfig --region $AWS_REGION --name istory
