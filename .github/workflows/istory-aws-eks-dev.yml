@@ -1,4 +1,4 @@
-#5
+#7
 name: istory-k8s-dev
 on:
   push:
@@ -48,7 +48,7 @@ jobs:
           cat > src/main/resources/application.yml << EOF
           spring:
             datasource:
-              #url: ${{ secrets.DATABASE_URL }} # 예jdbc:mysql://localhost:3306/istory
+              # url: ${{ secrets.DATABASE_URL }} # 예dbc:mysql://localhost:3306/istory
               url: jdbc:mysql://localhost:3306/istory
               username: ${{ secrets.MYSQL_USER }}
               password: ${{ secrets.MYSQL_PASSWORD }}
@@ -84,10 +84,8 @@ jobs:
           mkdir -p xinfra/docker/build/libs/
           cp build/libs/*.jar xinfra/docker/
           ls xinfra/docker/
-
       - name: 7.Docker Image Build
         run: docker build ./xinfra/docker -t ${{ secrets.DOCKER_USERNAME }}/istory:${{ env.DOCKER_TAG }} -f ./xinfra/docker/Dockerfile
-            
       - name: 8.Docker Login
         uses: docker/login-action@v3.0.0
         with:
@@ -105,24 +103,21 @@ jobs:
           ref: main # 바꾸기
           path: .
           token: ${{ secrets.GIT_PAT }}
-
       - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-    
+  
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name istory
-
       - name: apply secret
         run: |
           kubectl create secret generic istory-db-secret \
@@ -132,17 +127,14 @@ jobs:
             --from-literal=MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
             --namespace=default \
             --dry-run=client -o yaml | kubectl apply -f -
-
       - name: kustomize install
         run: |
           curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
           sudo mv kustomize /usr/local/bin
-
       - name: kustomize update image yaml
         run: |
-          cd overlay/aws-dev
+          cd overlay/awd-dev
           kustomize edit set image istory=Changsyn/istory:${{ github.run_number }}
-
       - name: push yaml
         run: |
           git config --global user.name 'github-actions[bot]'
